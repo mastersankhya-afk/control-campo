@@ -660,7 +660,7 @@ input[type=file]{display:none}
       </div>
       <textarea class="bit-textarea" id="bit-nota-txt" placeholder="Describe lo ocurrido en campo…"></textarea>
       <div class="bit-foto-row">
-        <button class="btn-foto-small" onclick="abrirFotoBit()">🖼️ Agregar foto</button>
+        <button class="btn-foto-small" onclick="abrirFotoBit()">🖼️ Agregar fotos</button>
         <div class="bit-foto-thumbs" id="bit-foto-thumbs"></div>
       </div>
       <button class="btn-bit-save" onclick="guardarNota()">GUARDAR NOTA</button>
@@ -757,7 +757,7 @@ input[type=file]{display:none}
 
 <!-- File inputs -->
 <input type="file" id="foto-input-cam" accept="image/*" capture="environment" onchange="onFoto(event)">
-<input type="file" id="foto-input-gal" accept="image/*" onchange="onFoto(event)">
+<input type="file" id="foto-input-gal" accept="image/*" multiple onchange="onFoto(event)">
 <input type="file" id="bit-foto-input-cam" accept="image/*" capture="environment" multiple onchange="onBitFoto(event)">
 <input type="file" id="bit-foto-input-gal" accept="image/*" multiple onchange="onBitFoto(event)">
 
@@ -1070,7 +1070,7 @@ function pushFirebase(cb){
   var bitSinFotos=S.bitacora.map(function(b){
     if(!b.fotos||!b.fotos.length)return b;
     // Incluir fotos pequeñas (<80KB), omitir las grandes
-    var fotosOk=b.fotos.filter(function(f){return f&&f.length<80000});
+    var fotosOk=b.fotos.filter(function(f){return f&&f.length<200000});
     return Object.assign({},b,{fotos:fotosOk});
   });
   var diasC={};
@@ -1396,7 +1396,7 @@ function comprimirB64(b64,maxSize,cb){
     else if(h>maxSize){w=Math.round(w*maxSize/h);h=maxSize}
     canvas.width=w;canvas.height=h;
     canvas.getContext('2d').drawImage(img,0,0,w,h);
-    cb(canvas.toDataURL('image/jpeg',.72));
+    cb(canvas.toDataURL('image/jpeg',.55));
   };
   img.src=b64;
 }
@@ -1426,7 +1426,7 @@ function comprimirImagen(file,maxSize,cb){
       else if(h>maxSize){w=Math.round(w*maxSize/h);h=maxSize}
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      cb(canvas.toDataURL('image/jpeg',.72));
+      cb(canvas.toDataURL('image/jpeg',.55));
     };
     img.src=e.target.result;
   };
