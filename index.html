@@ -55,7 +55,7 @@ html[data-theme="light"]{
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{min-height:100%}
 body{
   font-family:'Barlow',sans-serif;background:var(--bg);color:var(--tx);
   min-height:100%;padding-bottom:max(110px, calc(84px + env(safe-area-inset-bottom) + 24px));
@@ -568,6 +568,9 @@ input[type=file]{display:none}
 @media print{
   .credito,.bottom-bar,.toast,.hdr-actions,.nav-tabs-wrap{display:none!important}
 }
+
+.btn-asig-uno{background:var(--acc);color:var(--acc-tx);border:none;border-radius:8px;padding:7px 10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.pres-top .btn-asig-uno{margin-left:6px}
 
 </style>
 </head>
@@ -2337,7 +2340,8 @@ function renderPersonalDia(fecha){
     html+='<div class="pres"><div class="pres-top"><div class="pres-ic">✓</div>'
       +'<div class="pres-body"><div class="pres-name">'+esc(p.nombre)+'</div>'
       +'<div class="pres-meta'+(reales?'':' warn')+'">'+esc(p.puesto||'Otro')+' · '
-      +(reales?(reales+(reales===1?' actividad':' actividades')):'sin actividad asignada')+'</div></div>'
+      +(reales?(reales+(reales===1?' actividad':' actividades')):'sin actividad asignada')+'</div>'
+      +'<button class="btn-asig-uno" onclick="asignarA(\''+p.id+'\')">'+(reales?'＋ Otra actividad':'＋ Asignar actividad')+'</button></div>'
       +'<button class="jchip'+(pm.jd<1?' medio':'')+'" onclick="alternarJornada(\''+p.id+'\')">'
       +(pm.jd===0.5?'½':String(pm.jd))+'<small>jornal</small></button></div>'
       +'<div class="pres-bot"><div class="he"><span class="he-lbl">Horas extra</span><div class="stepper">'
@@ -2447,13 +2451,15 @@ function bajaPersona(pid){
 }
 
 // ── Asignar actividad ──
-function abrirAsignar(){
+function abrirAsignar(pid){
+  _sel={};if(pid&&personaPorId(pid))_sel[pid]=true;   // cada asignación empieza con la selección limpia
   document.getElementById('cua-asignar').classList.add('open');
   document.getElementById('btn-asignar').style.display='none';
   _asigConcepto=null;actualizarSelConcepto();
   abrirPicker();refrescarQuien();
   document.getElementById('cua-asignar').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function asignarA(pid){abrirAsignar(pid)}
 function cerrarAsignar(){
   document.getElementById('cua-asignar').classList.remove('open');
   document.getElementById('btn-asignar').style.display='';
@@ -2519,7 +2525,8 @@ function guardarAsignacion(){
   guardarCambiosAsistencia();
   var c=conceptoPorId(cid);
   toast('✓ '+sel.length+(sel.length===1?' persona':' personas')+' en '+(c?c.nombre.slice(0,36):'la actividad'));
-  _asigConcepto=null;actualizarSelConcepto();   // la selección de personas se conserva para la siguiente actividad
+  _asigConcepto=null;actualizarSelConcepto();
+  limpiarSeleccion();                            // la siguiente actividad empieza sin nadie marcado
   renderCuadrillas();
   renderCards();actualizarKPIs();               // refresca "Días" de los conceptos
   abrirPicker();
@@ -2556,7 +2563,8 @@ function renderActividadesDia(del){
     html+='<div class="act-head gen">Sin actividad asignada <span style="text-transform:none;letter-spacing:0;font-weight:500">(el jornal se paga; asígnalo para cargarlo a un concepto)</span></div>';
     gens.forEach(function(a){
       html+='<div class="act-row"><div class="act-name">'+esc(a.trabajador)+'<small>'+esc(a.oficio)+'</small></div>'
-        +'<div class="act-j">'+filaJ(Number(a.jornales)||0)+'<small>jornal</small></div></div>';
+        +'<div class="act-j">'+filaJ(Number(a.jornales)||0)+'<small>jornal</small></div>'
+        +'<button class="btn-asig-uno" onclick="asignarA(\''+a.pid+'\')">Asignar</button></div>';
     });
   }
   list.innerHTML=html;
